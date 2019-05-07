@@ -185,6 +185,7 @@ function game() {
   // Mistura os quadrados
   shuffleTimeouts = [];
   function shuffle() {
+    document.getElementById("moves").innerHTML = "";
     var num = document.getElementById('shufflenum').value;
     var boardTiles = document.querySelectorAll('.tile');
     var shuffleDelay = 200;
