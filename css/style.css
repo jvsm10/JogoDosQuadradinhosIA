@@ -2,6 +2,7 @@ body {
   font-family: 'Roboto Condensed', sans-serif;
   font-weight: 700;
   font-size: 24px;
+  height: 100vh;
   background-color: rgb(225,225,225);
   -webkit-tap-highlight-color: transparent;
   khtml-tap-highlight-color: transparent; }
@@ -13,6 +14,25 @@ body {
     border-color: red;
     text-align: center;
   }
+  footer{
+    text-align: center;
+    vertical-align: bottom;
+  }
+  footer a{
+    color: #3498DB;
+    cursor: pointer; 
+  }
+  .moves{
+    background-color: rgb(225,225,225);
+    border-width: 0ch;
+    border: rgb(225,225,225);
+  }
+  figcaption{
+    text-align: center;
+  }
+  span{
+    color: #E74C3C;
+  }
 
 .sliding-puzzle-figure {
   margin: auto;
@@ -20,8 +40,8 @@ body {
   width: 650px;
   max-height: 70vh;
   max-width: 70vh;
-  padding-bottom: 50vh;
-  padding-top: 10vh; }
+  /*padding-bottom: 50vh;*/
+  /*padding-top: 10vh; */}
   .sliding-puzzle-figure a {
     cursor: pointer; }
     .sliding-puzzle-figure a#shuffle {
@@ -30,6 +50,10 @@ body {
       color: #3498DB; }
       .sliding-puzzle-figure a#solve1{
       color: #3498DB; }
+      .sliding-puzzle-figure a#solve2{
+        color: #3498DB; }
+        .sliding-puzzle-figure a#solve3{
+          color: #3498DB; }
   .sliding-puzzle-figure .sliding-puzzle {
     list-style-type: none;
     position: relative;

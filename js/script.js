@@ -306,7 +306,7 @@ function game() {
       atu:0,
       prox:0
     };
-    while (!checkSolution()) {
+    while (p<7) {
       var j=1;
       for(var i=1;i<=8;i++){
         if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(hist, tileMap[i].tileNumber, tileMap[i].position)){
@@ -343,6 +343,7 @@ function game() {
         
         //console.log(tileMap);
     }
+    console.log(p);
   }
 
   //faz os movimentos da busca aleatoria
@@ -393,6 +394,7 @@ function game() {
         //console.log(tileMap.empty.position);
         //console.log(tileMap);
     }
+    document.getElementById("moves").innerHTML = p;
     console.log(p);
   }
 
@@ -412,7 +414,7 @@ function game() {
       atu:0,
       prox:0
     };
-    while (p<20) {
+    while (!checkSolution()) {
       var j=1;
       for(var i=1;i<=8;i++){
         if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(hist, tileMap[i].tileNumber, tileMap[i].position)){
@@ -432,7 +434,7 @@ function game() {
           aux = score[i].pos;
         }
       }
-        console.log(highscore);
+        //console.log(highscore);
         highscore = Number.MAX_VALUE;
         p++;
         hist.num = tileMap[aux].tileNumber;
