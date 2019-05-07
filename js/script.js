@@ -1,4 +1,4 @@
-// Begin game once DOM loaded
+// Inicia 
 document.addEventListener("DOMContentLoaded", game);
 
 function game() {
