@@ -63,7 +63,7 @@ function game() {
   }
 
   var tileMapFinal = tileMap;
-
+  var tileMapAux;
   function movementMap(position) {
     if (position == 9) return [6, 8];
     if (position == 8) return [5, 7, 9];
@@ -78,7 +78,7 @@ function game() {
 
   document.querySelector('#shuffle').addEventListener('click', shuffle , true);
   document.querySelector('#solve').addEventListener('click', heuristica1 , true);
-  //document.querySelector('#solve2').addEventListener('click', heuristica2 , true);
+  document.querySelector('#solve2').addEventListener('click', heuristica2 , true);
   document.querySelector('#solve3').addEventListener('click', heuristica3 , true);
   document.querySelector('#solve1').addEventListener('click', buscaAleatoria , true);
   var tiles = document.querySelectorAll('.tile');
@@ -98,7 +98,7 @@ function game() {
     var yMovement = parentX * (tileMap[tileId].top/100);
     var translateString = "translateX(" + xMovement + "px) " + "translateY(" + yMovement + "px)"
     tile.style.webkitTransform = translateString;
-    recolorTile(tile, tileId);
+    //recolorTile(tile, tileId);
   }
 
   function tileClicked(event) {
@@ -139,7 +139,7 @@ function game() {
     tileMap[tileNumber].left = emptyLeft;
     tileMap[tileNumber].position = emptyPosition;
 
-    recolorTile(tile, tileNumber);
+    //recolorTile(tile, tileNumber);
     //console.log(tileMap.empty.position + " "+ emptyPosition);
   }
 
@@ -197,6 +197,7 @@ function game() {
       shuffleTimeouts.push(setTimeout(shuffleLoop, shuffleDelay));
       shuffleCounter++;
     }
+    tileMapAux = tileMap;
   }
 
   var lastShuffled;
@@ -224,7 +225,7 @@ function game() {
 
   function clearTimers(timeoutArray) {
     for (var i = 0; i < timeoutArray.length; i++) {
-      clearTimeout(timeoutArray[i])
+      clearTimeout(timeoutArray[i]);
     }
   }
 
@@ -246,17 +247,54 @@ function game() {
   function he1score(){
     var score=0;
     for(i=1;i<=8;i++){
-      if(tileMap[i].tileNumber == tileMapFinal[i].position)
+      if(tileMap[i].position != i)
         score++;
     }
+    if(tileMap.empty.position != 9)
+        score++;
     return score;
   }
 
-  //Faz a avaliação para a heuristica de nivel 3
+  function he2score(moves){
+    var j=1;
+    var score;
+    var score_final=Number.MAX_VALUE;
+    for(var i=1;i<=8;i++){
+      if(tileMovable(tileMap[i].tileNumber) && !wasVisited(moves, tileMap[i].tileNumber, tileMap[i].position)){
+        aux = tileMap[i].position;
+        tileMap[i].position = tileMap.empty.position;
+        tileMap.empty.position = aux;
+        score = he1score();
+        if(score<=score_final)
+          score_final = score;
+        tileMap.empty.position = tileMap[i].position;
+        tileMap[i].position = aux;
+        j++;
+      } 
+    }
+    return score_final;
+  }
+
+  //Faz a avaliação para a heuristica 3
   function he3score(){
     var score=0;
-    for(i=1;i<=8;i++){
-        score+=Math.pow(tileMapFinal[i].position-tileMap[i].tileNumber,2);
+    var j;
+    for(var i=1;i<=8;i++){
+      for(j=1;j<=8;j++){
+        if(tileMap[j].position == i){
+          score+=Math.pow(i-tileMap[j].tileNumber,2);
+          break;
+        }
+      }
+      if(j>8){
+        score+=Math.pow(i-9,2);
+      }
+    }
+    for(j=1;j<=8;j++){
+      if(tileMap[j].position == 9){
+        score+=Math.pow(9-j,2);
+        break;
+      }
     }
     return score;
   }
@@ -264,19 +302,19 @@ function game() {
   function scoreTemplate(){
     var score = {
       1:{
-        score:0,
+        score:Number.MAX_VALUE,
         pos:0
       },
       2:{
-        score:0,
+        score:Number.MAX_VALUE,
         pos:0
       },
       3:{
-        score:0,
+        score:Number.MAX_VALUE,
         pos:0,
       },
       4:{
-        score:0,
+        score:Number.MAX_VALUE,
         pos:0
       }};
       return score;
@@ -284,21 +322,40 @@ function game() {
   
   //verifica se um movimento já foi efetuado
   function wasVisited(hist,val,pos){
-    for(var i;i<=hist.length;i++){
-      if(val==hist[i].num && hist[i].atu==pos && hist[i].prox == tileMap.empty.position)
+    for(var i=0;i<hist.length;i++){
+      //console.log(hist[i].num);
+      if(val==hist[i].num && hist[i].atu==pos && hist[i].prox == tileMap.empty.position){
+        console.log("teste");
         return true;
-      else return false;
+      }
     }
+    return false;
+  }
+
+  function moveIt(moves){
+    console.log(tileMap);
+    console.log(tileMapAux);
+    tileMap = tileMapAux;
+    console.log(tileMap);
+    for(var i=0;i<moves.length;i++){
+      console.log(moves[i]);
+      var val = document.getElementById("move_hist").value;
+      document.getElementById("move_hist").innerHTML = val + ""+moves[i] + " -> ";
+    //setTimeout(moveTile,i*100,tiles[moves[i]-1],false);
+    //moveTile(tiles[moves[i]-1],false);
+  }
   }
 
   //faz os movimentos da heuristica de nivel 1
   function heuristica1(){
+    clearTimeout
     console.log(tileMap);
     var emptyPosition;
     emptyPosition = tileMap.empty.position;
     var score = scoreTemplate();
     var aux;
-    var highscore=0;
+    var runner = [];
+    var highscore=Number.MAX_VALUE;
     var p=0;
     var move=0;
     var moves = [];
@@ -307,14 +364,17 @@ function game() {
       atu:0,
       prox:0
     };
-    while (p<7) {
+    while (p<50) {
       var j=1;
       for(var i=1;i<=8;i++){
-        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(hist, tileMap[i].tileNumber, tileMap[i].position)){
+        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(moves, tileMap[i].tileNumber, tileMap[i].position)){
           aux = tileMap[i].position;
           tileMap[i].position = emptyPosition;
+          tileMap.empty.position = aux;
           score[j].score = he1score();
+          //console.log(score[j].score+" "+i);
           score[j].pos = tileMap[i].tileNumber;
+          tileMap.empty.position = tileMap[i].position;
           tileMap[i].position = aux;
           j++;
         }
@@ -322,85 +382,35 @@ function game() {
       }
       
       for(var i=1;i<=4;i++){
-        if(score[i].score>=highscore){
+        if(score[i].score<=highscore && score[i].pos!=0){
           highscore = score[i].score;
           aux = score[i].pos;
         }
       }
-        highscore = 0;
+        highscore = Number.MAX_VALUE;
         p++;
-        //console.log(move);
+        console.log("ssss: "+aux);
         hist.num = tileMap[aux].tileNumber;
-        hist.atu = aux;
+        hist.atu = tileMap[aux].position;
         hist.prox = emptyPosition;
         moves.push(hist);
+        //console.log(moves);
         move = aux;
-       var locatedTileNumber = tileMap[aux].tileNumber;
-        //locatedTile = tiles[locatedTileNumber-1];
-        //setTimeout(moveTile, p*500, tiles[locatedTileNumber-1], false);
-        moveTile(tiles[locatedTileNumber-1], false);
+        runner.push(aux);
+        //setTimeout(moveTile, p*100, tiles[aux-1], false);
+        moveTile(tiles[aux-1], false);
+         // tileMap.empty.position = tileMap[aux].position;
+          //tileMap[aux].position = emptyPosition;
         score = scoreTemplate();
         emptyPosition = tileMap.empty.position;
-        
-        //console.log(tileMap);
     }
     console.log(p);
-  }
-
-  //faz os movimentos da busca aleatoria
-   function buscaAleatoria(){
-    clearTimers(shuffleTimeouts);
-    var emptyPosition;
-    emptyPosition = tileMap.empty.position;
-    var score = scoreTemplate();
-    var aux;
-    var highscore=0;
-    var p=0;
-    var move=0;
-    var moves = [];
-    var hist = {
-      num:0,
-      atu:0,
-      prox:0
-    };
-    while (!checkSolution()) {
-      var j=1;
-      for(var i=1;i<=8;i++){
-        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(hist, tileMap[i].tileNumber, tileMap[i].position)){
-          aux = tileMap[i].position;
-          tileMap[i].position = emptyPosition;
-          score[j].score = he1score();
-          score[j].pos = tileMap[i].tileNumber;
-          tileMap[i].position = aux;
-          j++;
-        }
-        
-      } 
-       var s = Math.floor(Math.floor(Math.random()*(j)));
-       if(s==0)
-        s=1;
-        aux = score[s].pos;
-        p++;
-        hist.num = tileMap[aux].tileNumber;
-        hist.atu = aux;
-        hist.prox = emptyPosition;
-        moves.push(hist);
-        move = aux;
-       var locatedTileNumber = tileMap[aux].tileNumber;
-        //locatedTile = tiles[locatedTileNumber-1];
-        //setTimeout(moveTile, p*100, tiles[locatedTileNumber-1], false);
-        moveTile(tiles[locatedTileNumber-1], false);
-        score = scoreTemplate();
-        emptyPosition = tileMap.empty.position;
-        //console.log(tileMap.empty.position);
-        //console.log(tileMap);
-    }
+    //moveIt(runner);
     document.getElementById("moves").innerHTML = p;
-    console.log(p);
   }
 
-  //faz os movimentos da heuristica de nivel 3
-  function heuristica3(){
+  function heuristica2(){
+    clearTimeout
     console.log(tileMap);
     var emptyPosition;
     emptyPosition = tileMap.empty.position;
@@ -418,11 +428,14 @@ function game() {
     while (!checkSolution()) {
       var j=1;
       for(var i=1;i<=8;i++){
-        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(hist, tileMap[i].tileNumber, tileMap[i].position)){
+        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(moves, tileMap[i].tileNumber, tileMap[i].position)){
           aux = tileMap[i].position;
           tileMap[i].position = emptyPosition;
-          score[j].score = he3score();
+          tileMap.empty.position = aux;
+          score[j].score = he2score(moves);
+          //console.log(score[j].score);
           score[j].pos = tileMap[i].tileNumber;
+          tileMap.empty.position = tileMap[i].position;
           tileMap[i].position = aux;
           j++;
         }
@@ -430,7 +443,63 @@ function game() {
       }
       
       for(var i=1;i<=4;i++){
-        if(score[i].score<highscore && score[i].score!=0){
+        if(score[i].score<=highscore && score[i].pos!=0){
+          highscore = score[i].score;
+          aux = score[i].pos;
+        }
+      }
+        highscore = Number.MAX_VALUE;
+        p++;
+        //console.log("ssss: "+aux);
+        hist.num = tileMap[aux].tileNumber;
+        hist.atu = tileMap[aux].position;
+        hist.prox = emptyPosition;
+        moves.push(hist);
+        move = aux;
+        //setTimeout(moveTile, p*100, tiles[aux-1], false);
+        moveTile(tiles[aux-1], false);
+        score = scoreTemplate();
+        emptyPosition = tileMap.empty.position;
+    }
+    console.log(p);
+    document.getElementById("moves").innerHTML = p;
+  }
+
+  //faz os movimentos da heuristica 3
+  function heuristica3(){
+    var emptyPosition;
+    emptyPosition = tileMap.empty.position;
+    var score = scoreTemplate();
+    var aux;
+    var sonscore;
+    var highscore=Number.MAX_VALUE;
+    var p=0;
+    var move=0;
+    var moves = [];
+    var hist = {
+      num:0,
+      atu:0,
+      prox:0
+    };
+    while (!checkSolution()) {
+      var j=1;
+      for(var i=1;i<=8;i++){
+        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(moves, tileMap[i].tileNumber, tileMap[i].position)){
+          aux = tileMap[i].position;
+          tileMap[i].position = emptyPosition;
+          tileMap.empty.position = aux;
+          sonscore = he1score() + he2score(move);//soma a menor do neto de menor pontuação com a pontuação do filho
+          score[j].score = sonscore;
+          score[j].pos = tileMap[i].tileNumber;
+          tileMap.empty.position = tileMap[i].position;
+          tileMap[i].position = aux;
+          j++;
+        }
+        
+      }
+      
+      for(var i=1;i<=4;i++){
+        if(score[i].score<highscore && score[i].pos!=0){
           highscore = score[i].score;
           aux = score[i].pos;
         }
@@ -439,7 +508,7 @@ function game() {
         highscore = Number.MAX_VALUE;
         p++;
         hist.num = tileMap[aux].tileNumber;
-        hist.atu = aux;
+        hist.atu = tileMap[aux].position;
         hist.prox = emptyPosition;
         moves.push(hist);
         move = tileMap[aux].tileNumber;
@@ -454,6 +523,57 @@ function game() {
     }
   }
 
-
+  
+  //faz os movimentos da busca aleatoria
+  function buscaAleatoria(){
+    clearTimers(shuffleTimeouts);
+    var emptyPosition;
+    emptyPosition = tileMap.empty.position;
+    var score = scoreTemplate();
+    var aux;
+    var highscore=0;
+    var p=0;
+    var move=0;
+    var moves = [];
+    var hist = {
+      num:0,
+      atu:0,
+      prox:0
+    };
+    while (!checkSolution()) {
+      var j=1;
+      for(var i=1;i<=8;i++){
+        if(tileMovable(tileMap[i].tileNumber) && move != tileMap[i].tileNumber && !wasVisited(moves, tileMap[i].tileNumber, tileMap[i].position)){
+          aux = tileMap[i].position;
+          tileMap[i].position = emptyPosition;
+          score[j].score = he1score();
+          score[j].pos = tileMap[i].tileNumber;
+          tileMap[i].position = aux;
+          j++;
+        }
+        
+      } 
+       var s = Math.floor(Math.floor(Math.random()*(j)));
+       if(s==0)
+        s=1;
+        aux = score[s].pos;
+        p++;
+        hist.num = tileMap[aux].tileNumber;
+        hist.atu = tileMap[aux].position;
+        hist.prox = emptyPosition;
+        moves.push(hist);
+        move = aux;
+       var locatedTileNumber = tileMap[aux].tileNumber;
+        //locatedTile = tiles[locatedTileNumber-1];
+        //setTimeout(moveTile, p*100, tiles[locatedTileNumber-1], false);
+        moveTile(tiles[locatedTileNumber-1], false);
+        score = scoreTemplate();
+        emptyPosition = tileMap.empty.position;
+        //console.log(tileMap.empty.position);
+        //console.log(tileMap);
+    }
+    document.getElementById("moves").innerHTML = p;
+    console.log(p);
+  }
 
 }
