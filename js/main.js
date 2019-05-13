@@ -174,7 +174,6 @@ function tileMovable(tileNumber) {
   // embaralha os quadrados
 shuffleTimeouts = [];
   function shuffle() {
-    document.getElementById("moves").innerHTML = "";
     var num = document.getElementById('shufflenum').value;
     var tilesTiles = document.querySelectorAll('.tile');
     var shuffleDelay = 200;
@@ -183,7 +182,10 @@ shuffleTimeouts = [];
     var shuffleCounter = 0;
     while (shuffleCounter < num-1) {
       shuffleDelay += 200;
-      shuffleTimeouts.push(setTimeout(shuffleLoop, shuffleDelay));
+      if(document.getElementById("anima").checked != true)
+        shuffleLoop();
+      else
+        shuffleTimeouts.push(setTimeout(shuffleLoop, shuffleDelay));
       shuffleCounter++;
     }
   }
@@ -253,10 +255,18 @@ shuffleTimeouts = [];
     heuristicas.filltiles(pos);
     var path = heuristicas.heuristica1();
     console.log(path);
+    if(document.getElementById("anima").checked == true){
     for(var i =0;i<path.length;i++){
       var num = path[i];
       setTimeout(moveTile,i*300,tiles[num-1],false);
     }
+  }
+  else{
+    for(var i =0;i<path.length;i++){
+      var num = path[i];
+      moveTile(tiles[num-1],false);
+    }
+  }
     document.getElementById("moves").innerHTML = path.length;
   }
 
@@ -269,9 +279,17 @@ shuffleTimeouts = [];
     heuristicas.filltiles(pos);
     var path = heuristicas.heuristica2();
     console.log(path);
-    for(var i =0;i<path.length;i++){
-      var num = path[i];
-      setTimeout(moveTile,i*300,tiles[num-1],false);
+    if(document.getElementById("anima").checked == true){
+      for(var i =0;i<path.length;i++){
+        var num = path[i];
+        setTimeout(moveTile,i*300,tiles[num-1],false);
+      }
+    }
+    else{
+      for(var i =0;i<path.length;i++){
+        var num = path[i];
+        moveTile(tiles[num-1],false);
+      }
     }
     document.getElementById("moves").innerHTML = path.length;
   }
@@ -285,9 +303,17 @@ shuffleTimeouts = [];
     heuristicas.filltiles(pos);
     var path = heuristicas.heuristica3();
     console.log(path);
-    for(var i =0;i<path.length;i++){
-      var num = path[i];
-      setTimeout(moveTile,i*300,tiles[num-1],false);
+    if(document.getElementById("anima").checked == true){
+      for(var i =0;i<path.length;i++){
+        var num = path[i];
+        setTimeout(moveTile,i*300,tiles[num-1],false);
+      }
+    }
+    else{
+      for(var i =0;i<path.length;i++){
+        var num = path[i];
+        moveTile(tiles[num-1],false);
+      }
     }
     document.getElementById("moves").innerHTML = path.length;
   }
